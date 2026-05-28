@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { useAtom } from "jotai";
 import { easing } from "maath";
 import { useEffect, useMemo, useRef, useState } from "react";
+
 import {
   Bone,
   BoxGeometry,
@@ -18,6 +19,7 @@ import {
 } from "three";
 import { degToRad } from "three/src/math/MathUtils.js";
 import { pageAtom, pages } from "./UI";
+//import { add } from "maath/dist/declarations/src/vector2";
 
 const easingFactor = 0.5; // Controls the speed of the easing
 const easingFactorFold = 0.3; // Controls the speed of the easing
@@ -27,7 +29,7 @@ const turningCurveStrength = 0.09; // Controls the strength of the curve
 
 const PAGE_WIDTH = 1.28;
 const PAGE_HEIGHT = 1.71; // 4:3 aspect ratio
-const PAGE_DEPTH = 0.003;
+const PAGE_DEPTH = 0.005;
 const PAGE_SEGMENTS = 30;
 const SEGMENT_WIDTH = PAGE_WIDTH / PAGE_SEGMENTS;
 
@@ -36,7 +38,7 @@ const pageGeometry = new BoxGeometry(
   PAGE_HEIGHT,
   PAGE_DEPTH,
   PAGE_SEGMENTS,
-  2
+  2,
 );
 
 pageGeometry.translate(PAGE_WIDTH / 2, 0, 0);
@@ -60,11 +62,11 @@ for (let i = 0; i < position.count; i++) {
 
 pageGeometry.setAttribute(
   "skinIndex",
-  new Uint16BufferAttribute(skinIndexes, 4)
+  new Uint16BufferAttribute(skinIndexes, 4),
 );
 pageGeometry.setAttribute(
   "skinWeight",
-  new Float32BufferAttribute(skinWeights, 4)
+  new Float32BufferAttribute(skinWeights, 4),
 );
 
 const whiteColor = new Color("white");
@@ -96,9 +98,31 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
     `/textures/${front}.jpg`,
     `/textures/${back}.jpg`,
     ...(number === 0 || number === pages.length - 1
-      ? [`/textures/book-cover-roughness.jpg`]
+      ? //? [`/textures/book-cover-roughness.jpg`]
+        [`/textures/votemariebw.png`]
       : []),
   ]);
+
+  // const addPadding = (texture, paddingPercent = 0.05) => {
+  //   const img = texture.image;
+  //   const canvas = document.createElement("canvas");
+  //   const pad = Math.floor(img.width * paddingPercent);
+  //   canvas.width = img.width;
+  //   canvas.height = img.height;
+  //   const ctx = canvas.getContext("2d");
+
+  //   // Fill with white background
+  //   ctx.fillStyle = "white";
+  //   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  //   // Draw image inset by padding amount
+  //   ctx.drawImage(img, pad, 0, img.width - pad * 2, img.height);
+
+  //   texture.image = canvas;
+  //   texture.needsUpdate = true;
+  //   return texture;
+  // };
+
   picture.colorSpace = picture2.colorSpace = SRGBColorSpace;
   const group = useRef();
   const turnedAt = useRef(0);
@@ -129,12 +153,12 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
         map: picture,
         ...(number === 0
           ? {
-              roughnessMap: pictureRoughness,
+              //roughnessMap: pictureRoughness,
             }
           : {
-              roughness: 0.1,
+              roughness: 0.7,
             }),
-        emissive: emissiveColor,
+        //emissive: emissiveColor,
         emissiveIntensity: 0,
       }),
       new MeshStandardMaterial({
@@ -143,11 +167,12 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
         ...(number === pages.length - 1
           ? {
               roughnessMap: pictureRoughness,
+              roughness: 0.8,
             }
           : {
-              roughness: 0.1,
+              roughness: 0.7,
             }),
-        emissive: emissiveColor,
+        //emissive: emissiveColor,
         emissiveIntensity: 0,
       }),
     ];
@@ -172,7 +197,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
       skinnedMeshRef.current.material[5].emissiveIntensity = MathUtils.lerp(
         skinnedMeshRef.current.material[4].emissiveIntensity,
         emissiveIntensity,
-        0.1
+        0.1,
       );
 
     if (lastOpened.current !== opened) {
@@ -214,7 +239,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
         "y",
         rotationAngle,
         easingFactor,
-        delta
+        delta,
       );
 
       const foldIntensity =
@@ -226,7 +251,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
         "x",
         foldRotationAngle * foldIntensity,
         easingFactorFold,
-        delta
+        delta,
       );
     }
   });
@@ -277,7 +302,7 @@ export const Book = ({ ...props }) => {
             () => {
               goToPage();
             },
-            Math.abs(page - delayedPage) > 2 ? 50 : 150
+            Math.abs(page - delayedPage) > 2 ? 50 : 150,
           );
           if (page > delayedPage) {
             return delayedPage + 1;
